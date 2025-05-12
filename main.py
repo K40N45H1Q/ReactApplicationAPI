@@ -3,6 +3,7 @@ from httpx import AsyncClient
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, String, Float, ForeignKey
@@ -11,10 +12,20 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker, Session
 # --- ENV & TELEGRAM ---
 load_dotenv()
 BOT_TOKEN = getenv("BOT_TOKEN")
+
 BOT_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 FILE_API = f"https://api.telegram.org/file/bot{BOT_TOKEN}"
 
 api = FastAPI()
+
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 🔐 Лучше заменить * на ['http://localhost:3000'] в продакшене
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @api.get("/avatar/{user_id}")
 async def get_avatar(user_id: int):
